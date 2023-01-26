@@ -1,57 +1,79 @@
 import csv
-import numpy as np
-titles = []
+
+filmMap = {
+
+}
 with open ('titles.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile, delimiter = ',')
     for row in reader:
-        titles.append(row)
-def sort_fn(row):
+        filmMap.setdefault(row['title'],[])
+        filmMap[row['title']].append(row['imdb_score'])
+        filmMap[row['title']].append(row['id'])
+actorsTitles = {
 
-    return row['imdb_score']
-
-titles.sort(key = sort_fn)
-titles = titles[0:1000]
-
-actors = []
+}
 with open ('credits.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile, delimiter = ',')
     for row in reader:
         if row['role'] == 'ACTOR':
-           actors.append(row)
+           actorsTitles.setdefault(row['name'],[])
+           actorsTitles[row['name']].append(row['id'])
 
-title_ids = {}
-for title in titles:
-    title_ids[title['id']] = True
 
-actor_popularity = {}
-for actor in actors:
-    if actor['id'] in title_ids:
-        if actor['name'] in actor_popularity:
-            actor_popularity[actor['name']] += 1
-        else:
-            actor_popularity[actor['name']] = 1
-result = []
-for key,value in actor_popularity.items():
-    result.append([key,value])
-def sort_rs(row):
-    return row[1]
-result.sort(key= sort_rs,reverse=True)
-result = result[0:10]
+#for title in titles:
 
-mapped_res = []
-for row in result:
-    mapped_res.append(row[0])
+sorted_values = sorted(filmMap.values())
+newFilmMap = {
 
-arr_1 = np.array(mapped_res)
-list_1 = arr_1.tolist()
-print(f'TOP-10: 1.{list_1[0]}, 2.{list_1[1]}, 3.{list_1[2]}, 4.{list_1[3]}, 5.{list_1[4]}, 6.{list_1[5]}, 7.{list_1[6]}, 8.{list_1[7]}, 9.{list_1[8]}, 10.{list_1[9]}')
+}
+
+for value in sorted_values:
+    for key in filmMap.keys():
+        if filmMap[key] == value:
+            newFilmMap[key] = filmMap[key]
+            break
 
 
 
+j = 0
+invertedFimlMap = {}
 
+for key, value in reversed(newFilmMap.items()):
+    if (len(invertedFimlMap) < 1000):
+        invertedFimlMap[key] = value
+    else:
+        break
 
+topActors = {
 
+}
 
+for actor, valueActor in actorsTitles.items():
+    for value in invertedFimlMap.values():
+        if value[1] in valueActor:
+            if actor in topActors.keys():
+                topActors[actor] += 1
+            elif actor not in topActors.keys():
+                topActors[actor] = 1
 
+sorted_actors = sorted(topActors.values())
+newTopActors = {
 
+}
 
+for value in sorted_actors:
+    for key in topActors.keys():
+        if topActors[key] == value:
+            newTopActors[key] = topActors[key]
+
+invertedTopActors = {
+
+}
+
+for key, value in reversed(newTopActors.items()):
+    if (len(invertedTopActors) < 10):
+        invertedTopActors[key] = value
+    else:
+        break
+
+print(invertedTopActors)
